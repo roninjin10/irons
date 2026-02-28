@@ -47,7 +47,7 @@ Examples:
 					return fmt.Errorf("stopping sandbox: %w", err)
 				}
 
-				if err := waitForStatus(client, name, []string{"stopped"}); err != nil {
+				if err := waitForStatus(cmd.Context(), client, name, []string{"stopped"}); err != nil {
 					return err
 				}
 
