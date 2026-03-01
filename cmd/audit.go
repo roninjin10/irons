@@ -57,6 +57,10 @@ Examples:
 			vmID = resolved
 		}
 
+		if follow {
+			fmt.Fprintf(os.Stderr, "Watching for events...")
+		}
+
 		params := api.AuditEgressParams{
 			VMID:    vmID,
 			Verdict: verdict,
