@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
+	"github.com/ironsh/irons/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,10 +32,8 @@ blocking them — useful for auditing before locking things down.`,
 			return
 		}
 
-		apiKey := viper.GetString("api-key")
-		if apiKey == "" {
-			fmt.Fprintf(os.Stderr, "Error: API key is required. Run `irons login`, set --api-key, or set IRONS_API_KEY.\n")
-			os.Exit(1)
+		if viper.GetString("api-key") == "" {
+			requireAuth()
 		}
 	},
 }
@@ -68,27 +65,11 @@ func init() {
 	viper.BindEnv("api-key", "IRONS_API_KEY")
 	viper.BindEnv("debug-api", "IRONS_DEBUG_API")
 
-	// Load config file from ~/.config/irons/config.yml (or $XDG_CONFIG_HOME).
-	// The key in the YAML file is "api_key", which we map to viper's "api-key".
-	base := os.Getenv("XDG_CONFIG_HOME")
-	if base == "" {
-		if home, err := os.UserHomeDir(); err == nil {
-			base = filepath.Join(home, ".config")
-		}
-	}
-	if base != "" {
-		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(filepath.Join(base, "irons"))
-		// Ignore "file not found" errors — the config is optional.
-		_ = viper.ReadInConfig()
-
-		// Bridge the yaml key "api_key" into viper's "api-key" so that
-		// flag/env/file all resolve through the same viper.GetString call.
-		if viper.GetString("api-key") == "" {
-			if saved := viper.GetString("api_key"); saved != "" {
-				viper.Set("api-key", saved)
-			}
+	// Load the API key from ~/.config/irons/config.yml (written by `irons login`).
+	// A flag or environment variable always takes precedence over the config file.
+	if viper.GetString("api-key") == "" {
+		if cfg, err := config.Load(); err == nil && cfg.APIKey != "" {
+			viper.Set("api-key", cfg.APIKey)
 		}
 	}
 
