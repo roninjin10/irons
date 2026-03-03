@@ -58,6 +58,26 @@ irons destroy my-sandbox
 
 Commands accept either a sandbox **name** or its **VM ID** (e.g. `vm_abc123`) — whichever is more convenient.
 
+## Claude Code Skill
+
+This repo includes a [Claude Code skill](https://docs.anthropic.com/en/docs/claude-code/skills) that teaches Claude how to use irons. To add it to another project:
+
+```sh
+git clone https://github.com/roninjin10/irons.git ~/.irons
+```
+
+Then add it to your project's `.claude/settings.json`:
+
+```json
+{
+  "skills": [
+    "~/.irons/.claude/skills/irons"
+  ]
+}
+```
+
+Claude Code will now have full knowledge of irons commands, egress configuration, and the REST API when working in that project.
+
 ## Documentation
 
 Full command reference, egress configuration, and guides are at **[docs.iron.sh](https://docs.iron.sh)**.
